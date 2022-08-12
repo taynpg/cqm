@@ -64,7 +64,9 @@ void  PrintJieQiGan(dateJieQiGan* pDateJieQiGan)
 // 根据日期(不计算时分秒)查找当天的节气范围和当日干支
 int SearchJieQiGan(dateJieQiGan* pDateJieQiGan, const calSolar* pSolar, char* pszJieqi, char* pszGanzhi)
 {
-    dateJieQiGan* p = pDateJieQiGan;
+    if (!pDateJieQiGan)
+        return -1;
+    dateJieQiGan* p = pDateJieQiGan->pNext;
 
     int rtn = -1;
 
@@ -573,7 +575,7 @@ int  qimenRun(calSolar* pSolar, int bIsAutoTime, int qimenJuShu)
     InitJieQiGan(&pGlobalJieQiGan);
     // 生成日期节气干支表(该步骤一定是使用 calendar 的所有函数的最优先的函数)
     GenerateJieQiGan(pSolar);
-    // PrintJieQiGan(pGlobalJieQiGan);
+    //PrintJieQiGan(pGlobalJieQiGan);
     // 计算当日的全部信息(注: 要在生成日期节气干支表完成后计算，因为 calendar 仅保存最后一次计算结果)
     calendarRun(pSolar);
 

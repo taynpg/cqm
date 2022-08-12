@@ -532,7 +532,7 @@ void dataAllocLunarDayChinese(dataHans** pData)
     strcpy(d[9].szData, "初十"); strcpy(d[10].szData, "十一"); strcpy(d[11].szData, "十二");
     strcpy(d[12].szData, "十三"); strcpy(d[13].szData, "十四"); strcpy(d[14].szData, "十五");
     strcpy(d[15].szData, "十六"); strcpy(d[16].szData, "十七"); strcpy(d[17].szData, "十八");
-    strcpy(d[17].szData, "十九"); strcpy(d[19].szData, "二十"); strcpy(d[20].szData, "廿一");
+    strcpy(d[18].szData, "十九"); strcpy(d[19].szData, "二十"); strcpy(d[20].szData, "廿一");
     strcpy(d[21].szData, "廿二"); strcpy(d[22].szData, "廿三"); strcpy(d[23].szData, "廿四");
     strcpy(d[24].szData, "廿五"); strcpy(d[25].szData, "廿六"); strcpy(d[26].szData, "廿七");
     strcpy(d[27].szData, "廿八"); strcpy(d[28].szData, "廿九"); strcpy(d[29].szData, "三十");

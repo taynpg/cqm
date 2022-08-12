@@ -27,5 +27,4 @@
 
 # 最后
 
-由于网络原因，cqm的主要开发git托管位置在码云上，[cqm 时家奇门遁甲排盘本地排盘工具](https://gitee.com/taynpg/cqm)。
 如果你有好的建议或者发现了`BUG`，可以联系我：taynpg@163.com。

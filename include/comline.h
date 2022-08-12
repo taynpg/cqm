@@ -1,6 +1,6 @@
 #include <calendar.h>
 
-#define CQM_VERSION "v1.0.5"
+#define CQM_VERSION "v1.0.6"
 
 void InlegalTime();
 // 传入命令行相关参数，当返回值为 0 时，pSolar 中保存解析出来的日期。
