@@ -14,7 +14,7 @@ if exist cqm.exe (
 )
 %~d0
 cd  %~dp0
-cl /EHsc /Fe%~dp0cqm.exe /source-charset:utf-8 /execution-charset:gbk /nologo  /I./include src/qimen.c src/data.c src/comline.c src/calendar.c main.c
+cl /EHsc /Fe%~dp0cqm.exe /source-charset:utf-8 /execution-charset:gbk /nologo  /I./include src/qimenzpzr.c src/qimenyp.c src/qimenbasic.c src/data.c src/comline.c src/calendar.c main.c
 del *.obj
 echo ===============================
 echo Done!

@@ -223,7 +223,7 @@ void StartBefore()
         dataAllocIndexCounterGetDay(&pGlobalQiShi);
 }
 // 计算完成后的工作()
-void calendarFreeAll()
+void calendarFree()
 {
     // 释放全局农历表
     if (pGlobalLunarTable)

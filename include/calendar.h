@@ -60,7 +60,7 @@ typedef struct _calResult
 
 int calendarRun(const calSolar* pSolar);                                                    // 传入公历进行结算
 void calendarGetResult(calResult** pResult);                                                // 拿到计算结果
-void calendarFreeAll();                                                                     // 计算完成后的释放所有资源
+void calendarFree();                                                                     // 计算完成后的释放所有资源
 
 // 处理时间相关的函数
 void GetNowTime(calSolar* pSolar);                                                          // 获取系统时间
@@ -72,7 +72,7 @@ void GetAfterDayFromDateOwn(calSolar* pSolar);                                  
 void DupSolar(const calSolar* pSourceSolar, calSolar* pDesSolar);                           // 复制 solar 结构体内容
 int GetDayDiffTwo(const calSolar* pSolarOne, const calSolar* pSolarTwo);                    // 返回两个日期之间的天数差
 int GetRemainder(int nNum, int nBasic);                                                     // 对数进行取余数(支持负数)
-
+INT64 GetSecondDiviTwoDate(const calSolar* pSolarOne, const calSolar* pSolarTwo);           // 返回两个日期之间相差的秒数
 // 根据基准日期和相差的秒钟计算另一个日期, 正向前，负向后 (Note: 请确认日期 solar 的正确性)
 void GetDateByDiffSecond(const calSolar* pSolar, calSolar* pResult, INT64 nSec);
 

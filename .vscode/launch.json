@@ -10,7 +10,7 @@
             "request": "launch",
             "program": "${workspaceFolder}\\cqm.exe",
             //"args": ["0", "0"],
-            "args": ["0", "0"],
+            "args": ["2022-8-13-13-13-0", "0", "1"],
             "stopAtEntry": false,
             "cwd": "${fileDirname}",
             "environment": [],

@@ -1,6 +1,48 @@
-#include <qimen.h>
+#include <qimenzpzr.h>
 #include <stdlib.h>
 #include <string.h>
+
+// ===  基础数据区
+extern dataHans*    pGlobalJieQiTable;
+extern dataHans*    pGlobalTianGan;
+extern dataHans*    pGlobalDiZhi;
+extern dataHans*    pGlobalSixtyJiaZi;
+extern dataIndex*   pGlobalLunarTabl;
+extern dataIndex*   pGlobalJieQiTime;
+extern dataIndex*   pGlobalWuHu;
+extern dataIndex*   pGlobalQiShi;
+
+extern int          nGlobalAutoJushu;
+extern dataHans*    pGlobalJiuxing;
+extern dataHans*    pGlobalBamen;
+extern dataHans*    pGlobalJiuxingR;
+extern dataHans*    pGlobalBamenR;
+extern dataHans*    pGlobalBashenR;
+extern dataIndex*   pGlobalJuAndQi;
+extern dataIndex*   pGlobalLiuJia;
+extern dataIndex*   pGlobalDiZhiGong;
+extern dataIndex*   pGlobalDiZhiChong;
+extern dataIndex*   pGlobalDiZhiSanhe;
+
+// 计算解结果区
+extern int          nReDiPan[9];                        // 原始下标
+extern int          nReTianPan[9];
+extern int          nReJiuXing[9];                      // 旋转下标
+extern int          nReBamen[9];                        // 旋转下标           
+extern int          nReBashen[9];                       // 旋转下标
+extern int          nReOther[9];                        // 内容为 0 表示没有，1 为空，2为马星
+extern int          nReZhifu;
+extern int          nReZhishi;
+
+extern int          bGlobalZhirun;                      // 0 不置润，其他置润
+extern int          bGlobalAutoTime;                    // 0 手动输入时间，其他自动获取时间
+extern int          nGlobalJushu;                       // 0 自动计算, 其他是几局就是几局
+extern char         szGlobalYuan[STR_LEN_08];           // 上中下三元
+extern char         szGlobalCurJieqi[STR_LEN_08];       // 传入日期当天的节气
+extern char         szGlobalCurGanzi[STR_LEN_08];       // 传入日期当天的日干支
+extern int          nOneCircle[8];                      // 九宫的顺时针旋转下标顺序(从坤2宫开始)
+extern char         szReNullOne[STR_LEN_08];            // 空亡一
+extern char         szReNullTwo[STR_LEN_08];            // 空亡二
 
 // 日期和节气日干支结构体
 typedef struct _dateJieQiGan
@@ -10,6 +52,8 @@ typedef struct _dateJieQiGan
     char                        szDayGanzhi[STR_LEN_08];
     struct _dateJieQiGan*       pNext;
 }dateJieQiGan;
+
+dateJieQiGan*   pGlobalJieQiGan = NULL;             // 日期和节气日干支表
 
 // 初始化日期和节气日干支结构体链表头
 void InitJieQiGan(dateJieQiGan** pHeader)
@@ -113,161 +157,16 @@ int GetNumIndex(int* pData, int nLen, int nKey)
     }
     return rtn;
 }
-// ===  基础数据区
-extern dataHans* pGlobalJieQiTable;
-extern dataHans* pGlobalTianGan;
-extern dataHans* pGlobalDiZhi;
-extern dataHans* pGlobalSixtyJiaZi;
-extern dataIndex* pGlobalLunarTabl;
-extern dataIndex* pGlobalJieQiTime;
-extern dataIndex* pGlobalWuHu;
-extern dataIndex* pGlobalQiShi;
 
-int             nGlobalAutoJushu = 1;
-dateJieQiGan*   pGlobalJieQiGan = NULL;             // 日期和节气日干支表
-dataHans*       pGlobalJiuxing = NULL;
-dataHans*       pGlobalBamen = NULL;
-dataHans*       pGlobalJiuxingR = NULL;
-dataHans*       pGlobalBamenR = NULL;
-dataHans*       pGlobalBashenR = NULL;
-dataIndex*      pGlobalJuAndQi = NULL;
-dataIndex*      pGlobalLiuJia = NULL;
-dataIndex*      pGlobalDiZhiGong = NULL;
-dataIndex*      pGlobalDiZhiChong = NULL;
-dataIndex*      pGlobalDiZhiSanhe = NULL;
 
 // ===  结果数据区
 extern calResult* pGlobalResult;
 
-int             bGlobalZhirun = 0;                  // 0 不置润，其他置润
-int             bGlobalAutoTime = 1;                // 0 手动输入时间，其他自动获取时间
-int             nGlobalJushu = 0;                   // 0 自动计算, 其他是几局就是几局
-char            szGlobalYuan[STR_LEN_08];           // 上中下三元
-char            szGlobalCurJieqi[STR_LEN_08];       // 传入日期当天的节气
-char            szGlobalCurGanzi[STR_LEN_08];       // 传入日期当天的日干支
-int             nOneCircle[8];                      // 九宫的顺时针旋转下标顺序(从坤2宫开始)
-
-// 计算解结果区
-int             nReDiPan[9];                        // 原始下标
-int             nReTianPan[9];
-int             nReJiuXing[9];                      // 旋转下标
-int             nReBamen[9];                        // 旋转下标           
-int             nReBashen[9];                       // 旋转下标
-int             nReOther[9];                        // 内容为 0 表示没有，1 为空，2为马星
-int             nReZhifu;
-int             nReZhishi;
-
 void GenerateJieQiGan(const calSolar* pSolar);      // 生成日期和节气日干支表
 int GenerateYuan(const calSolar* pSolar);           // 确定阴阳遁和三元
 
-void QimenInit()
-{
-    nReZhifu = -1;
-    nReZhishi = -1;
-
-    nOneCircle[0] = 1; nOneCircle[1] = 6; nOneCircle[2] = 5;
-    nOneCircle[3] = 0; nOneCircle[4] = 7; nOneCircle[5] = 2;
-    nOneCircle[6] = 3; nOneCircle[7] = 8; 
-
-    for (int i = 0; i < 9; ++i)
-    {
-        nReJiuXing[i] = -1;
-        nReBamen[i] = -1;
-        nReBashen[i] = -1;
-    }
-
-    memset(szGlobalYuan, 0x0, sizeof(szGlobalYuan));
-    memset(szGlobalCurJieqi, 0x0, sizeof(szGlobalCurJieqi));
-    memset(szGlobalCurGanzi, 0x0, sizeof(szGlobalCurGanzi));
-    // 1. 初始化九星表
-    if (pGlobalJiuxing == NULL)
-        dataAllocJiuxing(&pGlobalJiuxing);
-    if (pGlobalJiuxingR == NULL)
-        dataAllocJiuXingR(&pGlobalJiuxingR);
-    // 2. 初始化八门
-    if (pGlobalBamen == NULL)
-        dataAllocBamen(&pGlobalBamen);
-    if (pGlobalBamenR == NULL)
-        dataAllocBamenR(&pGlobalBamenR);
-    // 3. 初始化八神
-    if (pGlobalBashenR == NULL)
-        dataAllocBashenR(&pGlobalBashenR);
-    // 4. 初始化六甲
-    if (pGlobalLiuJia == NULL)
-        dataAllocLiuJia(&pGlobalLiuJia);
-    // 5. 初始化局和节气
-    if (pGlobalJuAndQi == NULL)
-        dataAllocJuAndQi(&pGlobalJuAndQi);
-    if (pGlobalDiZhiGong == NULL)
-        dataAllocDizhiGong(&pGlobalDiZhiGong);
-    if (pGlobalDiZhiChong == NULL)
-        dataAllocDizhiChong(&pGlobalDiZhiChong);
-    if (pGlobalDiZhiSanhe == NULL)
-        dataAllocDizhiSanhe(&pGlobalDiZhiSanhe);
-}
-void qimenFree()
-{
-    // 1. 去初始化九星表
-    if (pGlobalJiuxing)
-    {
-        dataFreeDataHans(pGlobalJiuxing);
-        pGlobalJiuxing = NULL;
-    }
-    if (pGlobalJiuxingR)
-    {
-        dataFreeDataHans(pGlobalJiuxingR);
-        pGlobalJiuxingR = NULL;
-    }
-    // 2. 去初始化八门
-    if (pGlobalBamen)
-    {
-        dataFreeDataHans(pGlobalBamen);
-        pGlobalBamen = NULL;
-    }
-    if (pGlobalBamenR)
-    {
-        dataFreeDataHans(pGlobalBamenR);
-        pGlobalBamenR = NULL;
-    }
-    // 3. 去初始化八神
-    if (pGlobalBashenR)
-    {
-        dataFreeDataHans(pGlobalBashenR);
-        pGlobalBashenR = NULL;
-    }
-    // 4. 去初始化六甲
-    if (pGlobalLiuJia)
-    {
-        dataFreeIndexCounter(pGlobalLiuJia);
-        pGlobalLiuJia = NULL;
-    }
-    // 5. 去初始化局和节气
-    if (pGlobalJuAndQi)
-    {
-        dataFreeIndexCounter(pGlobalJuAndQi);
-        pGlobalJuAndQi = NULL;
-    }
-    if (pGlobalDiZhiGong)
-    {
-        dataFreeIndexCounter(pGlobalDiZhiGong);
-        pGlobalDiZhiGong = NULL;
-    }
-    if (pGlobalDiZhiChong)
-    {
-        dataFreeIndexCounter(pGlobalDiZhiChong);
-        pGlobalDiZhiChong = NULL;
-    }
-    if (pGlobalDiZhiSanhe)
-    {
-        dataFreeIndexCounter(pGlobalDiZhiSanhe);
-        pGlobalDiZhiSanhe = NULL;
-    }
-    calendarFreeAll();
-    FreeJieQiGan(pGlobalJieQiGan);
-    pGlobalJieQiGan = NULL;
-}
 // 计算地盘
-void GenerateDiPan()
+void GenerateZpZrDiPan()
 {
     memset(nReDiPan, 0x0, sizeof(nReDiPan));
     int nT = -1;
@@ -305,7 +204,7 @@ void GenerateDiPan()
     }
 }
 // 找值符、直使
-void FindZhiShiFu()
+void FindZhiShiFuZpZr()
 {
     int hindex = dataFindHanIndex(pGlobalSixtyJiaZi, pGlobalResult->pGanzi->szLunarHourGZ);
     int futou = (hindex / 10) * 10;
@@ -318,7 +217,7 @@ void FindZhiShiFu()
     nReZhishi = reIndex;
 }
 // 计算八神
-void GenerateBaShen()
+void GenerateBaShenZpZr()
 {
     // "值符", "腾蛇", "太阴", "六合", "白虎", "玄武", "九地", "九天"
     char szTem[STR_LEN_08];
@@ -357,7 +256,7 @@ void GenerateBaShen()
     }
 }
 // 转动九星八门
-void GenerateXingMen()
+void GenerateXingMenZpZr()
 {
     char szTem[STR_LEN_08];
     memset(szTem, 0x0, sizeof(szTem));
@@ -478,7 +377,7 @@ void GenerateXingMen()
         nReBamen[nOneCircle[nStart % 8]] = (menIndex++) % 8;
 }
 // 计算天盘
-void GenerateTianPan()
+void GenerateTianPanZpZr()
 {
     char szTem[STR_LEN_08];
     memset(nReTianPan, 0x0, sizeof(nReTianPan));
@@ -501,28 +400,27 @@ void GenerateTianPan()
             nReTianPan[rindex] = diPanIndex;
     }
 }
-    // 计算旬空、马星
-void  GenerateOther()
+// 计算旬空、马星
+void GenerateOtherZpZr()
 {
     int hindex = dataFindHanIndex(pGlobalSixtyJiaZi, pGlobalResult->pGanzi->szLunarHourGZ);
     int xtou = (hindex / 10) * 10;
     
     char szTemOne[STR_LEN_08];
     char szTemTwo[STR_LEN_08];
-    char szReOne[STR_LEN_08];
-    char szReTwo[STR_LEN_08];
+
     memset(szTemOne, 0x0, sizeof(szTemOne));
     memset(szTemTwo, 0x0, sizeof(szTemTwo));
-    memset(szReOne, 0x0, sizeof(szReOne));
-    memset(szReTwo, 0x0, sizeof(szReTwo));
+    memset(szReNullOne, 0x0, sizeof(szReNullOne));
+    memset(szReNullTwo, 0x0, sizeof(szReNullTwo));
 
     strcpy(szTemOne, &pGlobalSixtyJiaZi->pHan->szData[STRINDEX((xtou + 10) % 60)]);
     strcpy(szTemTwo, &pGlobalSixtyJiaZi->pHan->szData[STRINDEX((xtou + 11) % 60)]);
-    dataGetSubStr(szTemOne, szReOne, 1, 1);
-    dataGetSubStr(szTemTwo, szReTwo, 1, 1);
+    dataGetSubStr(szTemOne, szReNullOne, 1, 1);
+    dataGetSubStr(szTemTwo, szReNullTwo, 1, 1);
 
-    int aindex = dataFindHanIndex(pGlobalDiZhi, szReOne);
-    int bindex = dataFindHanIndex(pGlobalDiZhi, szReTwo);
+    int aindex = dataFindHanIndex(pGlobalDiZhi, szReNullOne);
+    int bindex = dataFindHanIndex(pGlobalDiZhi, szReNullTwo);
 
     nReOther[pGlobalDiZhiGong->pIndex[aindex]] = 1;
     nReOther[pGlobalDiZhiGong->pIndex[bindex]] = 1;
@@ -542,9 +440,9 @@ void  GenerateOther()
 *   qimenJuShu:         奇门局数(阴9局到阳9局，-9 ~ 9, 0 表示自动计算局数，其他失败)
 *   return:             返回 0 成功，其他失败。
 */
-int  qimenRun(calSolar* pSolar, int bIsAutoTime, int qimenJuShu)
+int qimenZpZrRun(calSolar* pSolar, int bIsAutoTime, int qimenJuShu)
 {
-    QimenInit();
+    qimenInit();
     
     // 处理日期相关
     if (bIsAutoTime == 1)
@@ -582,6 +480,8 @@ int  qimenRun(calSolar* pSolar, int bIsAutoTime, int qimenJuShu)
     if (SearchJieQiGan(pGlobalJieQiGan, pSolar, szGlobalCurJieqi, szGlobalCurGanzi) != 0)
         return -1;
 
+    FreeJieQiGan(pGlobalJieQiGan);
+
     if (qimenJuShu == 0)
     {
     // 确定阴阳遁和三元
@@ -611,17 +511,17 @@ int  qimenRun(calSolar* pSolar, int bIsAutoTime, int qimenJuShu)
     }
     
     // 计算地盘
-    GenerateDiPan();
+    GenerateZpZrDiPan();
     // 查找值符、值使
-    FindZhiShiFu();
+    FindZhiShiFuZpZr();
     // 计算九星八门
-    GenerateXingMen();
+    GenerateXingMenZpZr();
     // 计算八神
-    GenerateBaShen();
+    GenerateBaShenZpZr();
     // 计算天盘
-    GenerateTianPan();
+    GenerateTianPanZpZr();
     // 计算旬空、马星
-    GenerateOther();
+    GenerateOtherZpZr();
     return 0;
 }
 

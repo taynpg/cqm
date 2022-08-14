@@ -54,6 +54,8 @@
         "xtree": "cpp",
         "xutility": "cpp",
         "windows.h": "c",
-        "define.h": "c"
+        "define.h": "c",
+        "zpzrqimen.h": "c",
+        "qimenzpzr.h": "c"
     }
 }
