@@ -28,3 +28,5 @@
 # 最后
 
 如果你有好的建议或者发现了`BUG`，可以联系我：taynpg@163.com。
+
+因github网络原因，主要更新地址在同名Gitee上：https://gitee.com/taynpg/cqm
