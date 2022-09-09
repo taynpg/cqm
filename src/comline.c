@@ -11,6 +11,7 @@ extern int             nReJiuXing[9];
 extern int             nReBamen[9];
 extern int             nReBashen[9];
 extern int             nReOther[9];                         // 内容为 0 表示没有，1 为空，2为马星
+extern int             nGongNum[9];
 extern int             nReZhifu;
 extern int             nReZhishi;
 char                   nReZhiFuHan[STR_LEN_08];
@@ -103,6 +104,7 @@ void PrintSecond(int nGongeIndex)
 {
     char szTem[STR_LEN_08];
     memset(szTem, 0x0, sizeof(szTem));
+
     if (nReJiuXing[nGongeIndex] == 5)
     {
         if ((strcmp("天禽", nReZhiFuHan) == 0) || (strcmp(nReZhiFuHan, "天芮") == 0))
@@ -150,12 +152,14 @@ void PrintThird(int nGongeIndex)
 {
     char szTem[STR_LEN_08];
     memset(szTem, 0x0, sizeof(szTem));
+
     strcpy(szTem, &pGlobalBamenR->pHan->szData[STRINDEX(nReBamen[nGongeIndex])]);
 
     if (strcmp(szTem, nReZhiShiHan) == 0)
         printf("|*%s    ", szTem);
     else
         printf("| %s    ", szTem);
+
     strcpy(szTem, &pGlobalTianGan->pHan->szData[STRINDEX(nReDiPan[nGongeIndex])]);
     printf("%s  ", szTem);
 }
@@ -168,8 +172,10 @@ void PrintQiMen()
     memset(nReZhiFuHan, 0x0, sizeof(nReZhifu));
     memset(nReZhiShiHan, 0x0, sizeof(nReZhiShiHan));
     memset(nReTianGanHan, 0x0, sizeof(nReTianGanHan));
+
     strcpy(nReZhiFuHan, &pGlobalJiuxing->pHan->szData[STRINDEX(nReZhifu)]);
     strcpy(nReZhiShiHan, &pGlobalBamen->pHan->szData[STRINDEX(nReZhishi)]);
+
     int dindex = dataFindHanIndex(pGlobalSixtyJiaZi, pGlobalResult->pGanzi->szLunarDayGZ);
     if ((dindex % 10) == 0)
     {
@@ -311,19 +317,25 @@ void PrintResult()
 
     memset(szTem, 0x0, sizeof(szTem));
     dataGetSubStr(pGlobalResult->pGanzi->szLunarHourGZ, szTem, 1, 1);
+    printf("%s ", szTem);
 
     switch (nStyle)
     {
     // 转盘超接法
     case 0:
-        printf("%s             (转盘超接置润)\n", szTem);
+        printf("            (转盘超接置润)\n");
         break;
     // 时家阴盘
     case 1:
     {
         // pGlobalTianGan->pHan->szData[STRINDEX(liuJiaIndex)]
         int nTemIndex = pGlobalResult->pLunar->nLunarMonth;
-        printf("%s        (月将:%s)(时家阴盘)\n", szTem, &pGlobalDiZhi->pHan->szData[STRINDEX((12 - nTemIndex))]);
+        printf("       (月将:%s)(时家阴盘)\n", &pGlobalDiZhi->pHan->szData[STRINDEX((12 - nTemIndex))]);
+        break;
+    }
+    case 2:
+    {
+        printf("                  (诸葛盘)\n");
         break;
     }
     default:
@@ -349,6 +361,11 @@ void PrintResult()
     case 1:
     {
         printf("[%s%s空亡]", szReNullOne, szReNullTwo);
+        break;
+    }
+    case 2:
+    {
+        printf("          ");
         break;
     }
     default:
@@ -397,13 +414,14 @@ void BaseInfomation(const char* pErrorInfo)
     if (pErrorInfo)
         printf("%s", pErrorInfo);
     printf("cqm %s 使用介绍:\n", CQM_VERSION);
-    printf("cqm 第三个参数表明排盘方式(当前支持以下排盘方式):\n", CQM_VERSION);
+    printf("cqm 第三个参数表明排盘方式(当前支持以下排盘方式):\n");
     printf("        0 时家转盘超接置润盘\n");
-    printf("        1 时家阴盘\n", CQM_VERSION);
+    printf("        1 时家阴盘\n");
+    printf("        2 诸葛盘\n");
     printf("\n");
     printf("以其中一个排盘方式为例=>\n");
     printf("示例1: cqm 0 0 0 (取当前时间，自动算局数，超接排盘)\n");
-    printf("示例2: cqm 1 0 0 (取当前时间+8h，自动算局数，超接排盘)\n");
+    printf("示例2: cqm 1 0 0 (取当前时间+8h, 自动算局数, 超接排盘)\n");
     printf("示例3: cqm 1992-6-15-18-31-12 0 0  (指定时间，自动算局数)\n");
     printf("示例4: cqm 1992-6-16-18-31-12 6 0  (指定时间，指定阳六局)\n");
     printf("示例5: cqm 1992-6-17-18-31-12 -6 0 (指定时间，指定阴六局)\n");
@@ -436,14 +454,14 @@ int  ParseCommand(int nArgc, char** pArgv, calSolar* pSolar, int* pnJushu, int* 
     }
     if (nArgc != 4)
     {
-        sprintf(szTem, "参数的个数不正确，应为3个。\n\n");
+        sprintf(szTem, "参数的个数不正确, 应为3个。\n\n");
         BaseInfomation(szTem);
         return -1;
     }
     int nParseRe = 0;
     int nTem = -1;
     // 解析第一个参数
-    nParseRe = sscanf((const char*)pArgv[1], "%d", &nTem);
+    nParseRe = sscanf((const char*)pArgv[1], "%d", &nTem);   /* NOLINT */
     if (nParseRe == 1)
     {
         if (nTem == 0)
@@ -454,7 +472,7 @@ int  ParseCommand(int nArgc, char** pArgv, calSolar* pSolar, int* pnJushu, int* 
         {
             (*pbIsAutoTime) = 0;
             nParseRe = 0;
-            nParseRe = sscanf((const char*)pArgv[1], "%d-%d-%d-%d-%d-%d",
+            nParseRe = sscanf((const char*)pArgv[1], "%d-%d-%d-%d-%d-%d",  /* NOLINT */
                                 &(pSolar->nSolarYear),
                                 &(pSolar->nSolarMonth),
                                 &(pSolar->nSolarDay),
@@ -478,32 +496,32 @@ int  ParseCommand(int nArgc, char** pArgv, calSolar* pSolar, int* pnJushu, int* 
 
     nParseRe = 0;
     // 解析第二个参数
-    nParseRe = sscanf((const char*)pArgv[2], "%d", pnJushu);
+    nParseRe = sscanf((const char*)pArgv[2], "%d", pnJushu);        /* NOLINT */
     if (nParseRe != 1)
     {
-        sprintf(szTem, "参数2格式不正确，范围 -9 ~ 9。\n\n");
+        sprintf(szTem, "参数2格式不正确, 范围 -9 ~ 9。\n\n");
         BaseInfomation(szTem);
         return -2;
     }
     if (*pnJushu > 9 || *pnJushu < -9)
     {
-        sprintf(szTem, "参数2值不正确，范围 -9 ~ 9。\n\n");
+        sprintf(szTem, "参数2值不正确, 范围 -9 ~ 9。\n\n");
         BaseInfomation(szTem);
         return -2;
     }
 
     nParseRe = 0;
     // 解析第三个参数
-    nParseRe = sscanf((const char*)pArgv[3], "%d", nStyle);
+    nParseRe = sscanf((const char*)pArgv[3], "%d", nStyle);     /* NOLINT */
     if (nParseRe != 1)
     {
-        sprintf(szTem, "参数3格式不正确，目前支持 0、1。\n\n");
+        sprintf(szTem, "参数3格式不正确, 目前支持 0、1、2。\n\n");
         BaseInfomation(szTem);
         return -2;
     }
-    if (*nStyle != 0 && *nStyle != 1)
+    if (*nStyle != 0 && *nStyle != 1 && *nStyle != 2)
     {
-        sprintf(szTem, "参数3值不正确，目前支持 0、1。\n\n");
+        sprintf(szTem, "参数3值不正确, 目前支持 0、1、2。\n\n");
         BaseInfomation(szTem);
         return -2;
     }

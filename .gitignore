@@ -1,0 +1,7 @@
+CMakeLists.txt.user
+.gitignore.swp
+.DS_Store
+out
+.vs
+cmake-build-debug
+.idea

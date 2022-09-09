@@ -7,7 +7,7 @@ extern dataHans*    pGlobalJieQiTable;
 extern dataHans*    pGlobalTianGan;
 extern dataHans*    pGlobalDiZhi;
 extern dataHans*    pGlobalSixtyJiaZi;
-extern dataIndex*   pGlobalLunarTabl;
+// extern dataIndex*   pGlobalLunarTabl;
 extern dataIndex*   pGlobalJieQiTime;
 extern dataIndex*   pGlobalWuHu;
 extern dataIndex*   pGlobalQiShi;
@@ -33,9 +33,9 @@ extern int          nReBashen[9];                       // 旋转下标
 extern int          nReOther[9];                        // 内容为 0 表示没有，1 为空，2为马星
 extern int          nReZhifu;
 extern int          nReZhishi;
-
+extern int          nGongNum[9];
 extern int          bGlobalZhirun;                      // 0 不置润，其他置润
-extern int          bGlobalAutoTime;                    // 0 手动输入时间，其他自动获取时间
+// extern int          bGlobalAutoTime;                    // 0 手动输入时间，其他自动获取时间
 extern int          nGlobalJushu;                       // 0 自动计算, 其他是几局就是几局
 extern char         szGlobalYuan[STR_LEN_08];           // 上中下三元
 extern char         szGlobalCurJieqi[STR_LEN_08];       // 传入日期当天的节气
@@ -45,20 +45,24 @@ extern char         szReNullOne[STR_LEN_08];            // 空亡一
 extern char         szReNullTwo[STR_LEN_08];            // 空亡二
 
 // 日期和节气日干支结构体
-typedef struct _dateJieQiGan
+typedef struct _dateJieQiGan        /* NOLINT  */
 {
     calSolar                    pSolar;
     char                        szJieQi[STR_LEN_08];
     char                        szDayGanzhi[STR_LEN_08];
-    struct _dateJieQiGan*       pNext;
+    struct _dateJieQiGan*        pNext;
 }dateJieQiGan;
 
-dateJieQiGan*   pGlobalJieQiGan = NULL;             // 日期和节气日干支表
+dateJieQiGan*  pGlobalJieQiGan = NULL;             // 日期和节气日干支表
 
 // 初始化日期和节气日干支结构体链表头
 void InitJieQiGan(dateJieQiGan** pHeader)
 {
     (*pHeader) = (dateJieQiGan *)malloc(sizeof(dateJieQiGan));
+
+    if (!(*pHeader))
+        return;
+
     (*pHeader)->pSolar.nSolarYear = 2021;
     (*pHeader)->pSolar.nSolarMonth = 12;
     (*pHeader)->pSolar.nSolarDay = 26;
@@ -74,6 +78,9 @@ void InsertJieQiGan(dateJieQiGan** pJieQiGanHeader, const calSolar* pSolar, cons
 {
     dateJieQiGan* h = (*pJieQiGanHeader);
     dateJieQiGan* d = (dateJieQiGan *)malloc(sizeof(dateJieQiGan));
+
+    if (!d)
+        return;
 
     d->pSolar.nSolarYear = pSolar->nSolarYear;
     d->pSolar.nSolarMonth = pSolar->nSolarMonth;
@@ -92,7 +99,7 @@ void InsertJieQiGan(dateJieQiGan** pJieQiGanHeader, const calSolar* pSolar, cons
     h->pNext = d;
 }
 // 打印 JieQiGan
-void  PrintJieQiGan(dateJieQiGan* pDateJieQiGan)
+void  PrintJieQiGan(dateJieQiGan* pDateJieQiGan)  /* NOLINT */
 {
     if (pDateJieQiGan == NULL)
         return;
@@ -135,7 +142,7 @@ int SearchJieQiGan(dateJieQiGan* pDateJieQiGan, const calSolar* pSolar, char* ps
     return rtn;
 }
 // 释放日期和节气日干支结构体链表内存
-void FreeJieQiGan(dateJieQiGan* pDateJieQiGan)
+void FreeJieQiGan(dateJieQiGan* pDateJieQiGan) /* NOLINT */
 {
     if (pDateJieQiGan == NULL)
         return;
@@ -144,7 +151,7 @@ void FreeJieQiGan(dateJieQiGan* pDateJieQiGan)
     free(pDateJieQiGan);
 }
 // 查找一个整数在某个整数数组中的下标
-int GetNumIndex(int* pData, int nLen, int nKey)
+int GetNumIndex(const int* pData, int nLen, int nKey)
 {
     int rtn = -1;
     for (int i = 0; i < nLen; ++i)
@@ -158,12 +165,11 @@ int GetNumIndex(int* pData, int nLen, int nKey)
     return rtn;
 }
 
-
 // ===  结果数据区
 extern calResult* pGlobalResult;
 
 void GenerateJieQiGan(const calSolar* pSolar);      // 生成日期和节气日干支表
-int GenerateYuan(const calSolar* pSolar);           // 确定阴阳遁和三元
+int GenerateYuan();                                 // 确定阴阳遁和三元
 
 // 计算地盘
 void GenerateZpZrDiPan()
@@ -174,32 +180,38 @@ void GenerateZpZrDiPan()
         nT = -nGlobalJushu;
     else
         nT = nGlobalJushu;
-    int si = GetRemainder(nT - 1, 9);  
-    nReDiPan[si] = 4;   // 4 - 戊
+    // 戊应当所在数字下标
+    int si = GetRemainder(nT - 1, 9);
+    // 找寻下标在哪个位置
+    int nIndexPosition = GetIndexFromArray(nGongNum, 9, si);
+    nReDiPan[nIndexPosition] = 4;   // 4 - 戊
+
     if (nGlobalJushu < 0)
     {
         for (int i = 0; i < 5; ++i)
         {
-            --si;
-            nReDiPan[GetRemainder(si, 9)] = 5 + i;
+            nIndexPosition = GetIndexFromArray(nGongNum, 9, GetRemainder(--si, 9));
+            nReDiPan[nIndexPosition] = 5 + i;
         }
+
         for (int i = 0; i < 3; ++i)
         {
-            --si;
-            nReDiPan[GetRemainder(si, 9)] = 3 - i;
+            nIndexPosition = GetIndexFromArray(nGongNum, 9, GetRemainder(--si, 9));
+            nReDiPan[nIndexPosition] = 3 - i;
         }
     }
     else
     {
         for (int i = 0; i < 5; ++i)
         {
-            ++si;
-            nReDiPan[GetRemainder(si, 9)] = 5 + i;
+            nIndexPosition = GetIndexFromArray(nGongNum, 9, GetRemainder(++si, 9));
+            nReDiPan[nIndexPosition] = 5 + i;
         }
+
         for (int i = 0; i < 3; ++i)
         {
-            ++si;
-            nReDiPan[GetRemainder(si, 9)] = 3 - i;
+            nIndexPosition = GetIndexFromArray(nGongNum, 9, GetRemainder(++si, 9));
+            nReDiPan[nIndexPosition] = 3 - i;
         }
     }
 }
@@ -222,45 +234,34 @@ void GenerateBaShenZpZr()
     // "值符", "腾蛇", "太阴", "六合", "白虎", "玄武", "九地", "九天"
     char szTem[STR_LEN_08];
     memset(szTem, 0x0, sizeof(szTem));
-    dataGetSubStr(pGlobalResult->pGanzi->szLunarHourGZ, szTem, 0, 1);
-    int liuJiaIndex = 0;
-    if (strcmp(szTem, "甲") == 0)
-    {
-        int hourIndex = dataFindHanIndex(pGlobalSixtyJiaZi, pGlobalResult->pGanzi->szLunarHourGZ);
-        liuJiaIndex = pGlobalLiuJia->pIndex[hourIndex];
-        strcpy(szTem, &pGlobalTianGan->pHan->szData[STRINDEX(liuJiaIndex)]);
-    }
-    // 1. 看天干在数据中的索引
-    int sindex = dataFindHanIndex(pGlobalTianGan, szTem);
-    int dindex = GetNumIndex(nReDiPan, 9, sindex);
+    // 1.找值符是谁
+    strcpy(szTem, &pGlobalJiuxing->pHan->szData[STRINDEX(nReZhifu)]);
+    // 2.查看值符在旋转九星中的下标
+    int xingTurnedIndex = dataFindHanIndex(pGlobalJiuxingR, szTem);
+    // 3.查看此下标在哪个宫位
+    int nGongIndex = GetIndexFromArray(nReJiuXing, 8, xingTurnedIndex);
+    // 4.查找这个启示标位在旋转数组中的位置
+    int nTurn = GetIndexFromArray(nOneCircle, 8, nGongIndex);
 
-    int tindex = dindex;
-    if (tindex == 4)
-        tindex = 1;
-    int nstart = 0;
-    for (int i = 0; i < 8; ++i, ++nstart)
+    // 5.那么就从此宫位开始排布
+    if (nGlobalJushu < 0)
     {
-        if (tindex == nOneCircle[i])
-            break;
-    }
-    int pindex = 0;
-    if (nGlobalJushu > 0)
-    {
-        for (int i = 0; i < 8; ++i, ++nstart)
-            nReBashen[nOneCircle[nstart % 8]] = i;
+        for (int i = 0; i < 8; ++i, --nTurn)
+            nReBashen[nOneCircle[GetRemainder(nTurn, 8)]] = i;
     }
     else
     {
-        for (int i = 0; i < 8; ++i, --nstart)
-            nReBashen[nOneCircle[GetRemainder(nstart, 8)]] = i;
+        for (int i = 0; i < 8; ++i, ++nTurn)
+            nReBashen[nOneCircle[GetRemainder(nTurn, 8)]] = i;
     }
 }
-// 转动九星八门
-void GenerateXingMenZpZr()
+// 转动九星
+void GenerateXingZpZr()
 {
     char szTem[STR_LEN_08];
     memset(szTem, 0x0, sizeof(szTem));
 
+    // 把值符排在时干所落地盘宫位之上
     dataGetSubStr(pGlobalResult->pGanzi->szLunarHourGZ, szTem, 0, 1);
     // 如果时辰天干为甲，则伏吟
     if (strcmp(szTem, "甲") == 0)
@@ -298,106 +299,88 @@ void GenerateXingMenZpZr()
     strcpy(szTem, &pGlobalJiuxing->pHan->szData[STRINDEX(nReZhifu)]);
     if (strcmp("天禽", szTem) == 0)
         strcpy(szTem, "天芮");
-    int rsindex = dataFindHanIndex(pGlobalJiuxingR, szTem);
-    int nZhifu = rsindex;
+    int startXingIndex = dataFindHanIndex(pGlobalJiuxingR, szTem);
     
-    nReJiuXing[nTempIndex] = nZhifu;
+    nReJiuXing[nTempIndex] = startXingIndex;
     int nStart = 0;
     for (int i = 0; i < 8; ++i, ++nStart)
     {
         if (nTempIndex == nOneCircle[i])
             break;
     }
-    int nNextXingIndex = -1;
-    strcpy(szTem, &pGlobalJiuxing->pHan->szData[STRINDEX(nZhifu)]);
-    nNextXingIndex = dataFindHanIndex(pGlobalJiuxingR, szTem);
     // 蓬、任、冲、辅、英、芮、柱、心
     for (int i = 0; i < 8; ++i)
-    {
-        nNextXingIndex = (++nZhifu) % 8;
-        ++nStart;
-        nReJiuXing[nOneCircle[nStart % 8]] = nNextXingIndex;
-    }
+        nReJiuXing[nOneCircle[++nStart % 8]] = (++startXingIndex) % 8;
 
-    // 九星排列完成，接下来是八门
+    nReJiuXing[4] = 4;
+}
+// 转动八门
+void GenerateMenZpZr()
+{    
+    // 确定值使从哪一个宫开始转
     int hindex = dataFindHanIndex(pGlobalSixtyJiaZi, pGlobalResult->pGanzi->szLunarHourGZ);
     int futou = (hindex / 10) * 10;
-    // 旬头对应的六仪
-    int nLiuYi = pGlobalLiuJia->pIndex[futou];
-    int nGongwei = GetNumIndex(nReDiPan, 9, nLiuYi);
-    // 从 nLiuYi 开始向后排列
-    int nTemp = 0;
+
+    // 查看当前符头的地支是谁
+    int nDizhi = pGlobalLiuJia->pIndex[futou];
+    // 查看当前这个地支在哪个宫位
+    int nGongIndex = GetIndexFromArray(nReDiPan, 9, nDizhi);
+
+    // 查看当前时辰距离符头有几跳
+    int nNum = hindex - futou;
+    // int startGongIndex = nReZhifu;
+    // 查看符头地支的位置在哪一个宫位 就是值符值使的位置（阳顺阴逆）
     if (nGlobalJushu < 0)
     {
-        // 阴遁
-        for (int i = 0; i < 9; ++i)
-        {
-            if (futou == hindex)
-                break;        
-            --nGongwei;
-            ++futou;
-            nTemp = GetRemainder(nGongwei, 9);
-        }
+        for (int i = 0; i < nNum; ++i)
+            nGongIndex = GetRemainder(--nGongIndex, 9);
     }
     else
     {
-        // 阳遁
-        for (int i = 0; i < 9; ++i)
-        {
-            if (futou == hindex)
-                break;        
-            ++nGongwei;
-            ++futou;
-            nTemp = GetRemainder(nGongwei, 9);
-        }
-    }
-    if (nTemp == 4)
-        nTemp = 1;
-
-    nStart = 0;
-    for (int i = 0; i < 8; ++i, ++nStart)
-    {
-        if (nTemp == nOneCircle[i])
-            break;
+        for (int i = 0; i < nNum; ++i)
+            nGongIndex = GetRemainder(++nGongIndex, 9);
     }
 
-    int menIndex = 0;
-    // 找出门的下标
+    // 至此值使的起始宫位就确定了，先看当前的值使在旋转八门中的位置
+    char szTem[STR_LEN_08];
+    memset(szTem, 0x0, sizeof(szTem));
     strcpy(szTem, &pGlobalBamen->pHan->szData[STRINDEX(nReZhishi)]);
-    char szTem2[STR_LEN_08];
-    for (int i = 0; i < 8; ++i, ++menIndex)
-    {
-        memset(szTem2, 0x0, sizeof(szTem2));
-        strcpy(szTem2, &pGlobalBamenR->pHan->szData[STRINDEX(i)]);
-        if (strcmp(szTem, szTem2) == 0)
-            break;
-    }
+    int startTurnIndex = dataFindHanIndex(pGlobalBamenR, szTem);
+
+    // 查看一下此值使所在的宫位在旋转数组中拍第几个
+    int nTurnIndex = GetIndexFromArray(nOneCircle, 8, nGongIndex);
     // 休、生、伤、杜、景、死、惊、开
-    for (int i = 0; i < 8; ++i, ++nStart)
-        nReBamen[nOneCircle[nStart % 8]] = (menIndex++) % 8;
+    for (int i = 0; i < 8; ++i, ++nTurnIndex, ++startTurnIndex)
+        nReBamen[nOneCircle[GetRemainder(nTurnIndex, 8)]] = GetRemainder(startTurnIndex, 8);
 }
 // 计算天盘
 void GenerateTianPanZpZr()
 {
     char szTem[STR_LEN_08];
     memset(nReTianPan, 0x0, sizeof(nReTianPan));
-    int diPanIndex = -1;
-    int k = 0;
+
     for (int i = 0; i < 9; ++i)
     {
-        k = i;
-        if (k == 4)
-            k = 1;
-        diPanIndex = nReDiPan[i];
-        // 原 九星 在旋转 九星中的位置
-        memset(szTem, 0x0, sizeof(szTem));
-        strcpy(szTem, &pGlobalJiuxing->pHan->szData[STRINDEX(k)]);
-        int zindex = dataFindHanIndex(pGlobalJiuxingR, szTem);
-        int rindex = GetNumIndex(nReJiuXing, 9, zindex);
-        if (nReTianPan[rindex] != 0)
-            nReTianPan[rindex] = diPanIndex + (nReTianPan[rindex] * 10);
-        else
-            nReTianPan[rindex] = diPanIndex;
+        if (i == 4)
+            continue;
+
+        // 查看当前的宫是哪个星
+        int xingIndex = nReJiuXing[i];
+        strcpy(szTem, &pGlobalJiuxingR->pHan->szData[STRINDEX(xingIndex)]);
+
+        // 查看此星的原始宫位
+        int preGongIndex = dataFindHanIndex(pGlobalJiuxing, szTem);
+
+        // 拿到原始宫位的地盘干
+        int di = nReDiPan[preGongIndex];
+        nReTianPan[i] = di;
+
+        // 如果使天芮星则隐含有个天禽星在里面
+        if (strcmp(szTem, "天芮") == 0)
+        {
+            // 看天禽星的地盘
+            nReTianPan[i] = nReDiPan[4] + (nReTianPan[i] * 10);
+        }
     }
 }
 // 计算旬空、马星
@@ -444,31 +427,9 @@ int qimenZpZrRun(calSolar* pSolar, int bIsAutoTime, int qimenJuShu)
 {
     qimenInit();
     
-    // 处理日期相关
-    if (bIsAutoTime == 1)
-        GetNowTime(pSolar);
-
-    if (bIsAutoTime == 2)
-    {
-        GetNowTime(pSolar);
-        calSolar sTem;
-        DupSolar(pSolar, &sTem);
-        GetDateByDiffSecond(&sTem, pSolar, 8*60*60);
-    }
-
-    if (qimenJuShu < -9 || qimenJuShu > 9)
-        return -1;
-
-    // 检查日期是否合法
-    if (IsSolarLegal(pSolar) != 0)
-    {
-        InlegalTime();
-        return -2;
-    }
-
-    // 检查日期是否在范围内
-    if (IsSolarAreaLegal(pSolar) != 0)
-        return -3;
+    int nRet = qimenParmCheck(pSolar, bIsAutoTime, qimenJuShu);
+    if (nRet != 0)
+        return nRet;
 
     InitJieQiGan(&pGlobalJieQiGan);
     // 生成日期节气干支表(该步骤一定是使用 calendar 的所有函数的最优先的函数)
@@ -512,21 +473,24 @@ int qimenZpZrRun(calSolar* pSolar, int bIsAutoTime, int qimenJuShu)
     
     // 计算地盘
     GenerateZpZrDiPan();
-    // 查找值符、值使
+    // 查找值符值使
     FindZhiShiFuZpZr();
-    // 计算九星八门
-    GenerateXingMenZpZr();
-    // 计算八神
-    GenerateBaShenZpZr();
+    // 九星
+    GenerateXingZpZr();
     // 计算天盘
     GenerateTianPanZpZr();
+    // 转动八门
+    GenerateMenZpZr();
+    // 计算八神
+    GenerateBaShenZpZr();
     // 计算旬空、马星
     GenerateOtherZpZr();
+
     return 0;
 }
 
 // 确定阴阳遁和三元
-int GenerateYuan(const calSolar* pSolar)
+int GenerateYuan()
 {
     int cindex = dataFindHanIndex(pGlobalSixtyJiaZi, szGlobalCurGanzi);
     int futou = (cindex / 15) * 15;
@@ -698,7 +662,7 @@ void GenerateJieQiGan(const calSolar* pSolar)
         aindex++;
         GetAfterDayFromDateOwn(&cntemp);
         memset(nextGanzhi, 0x0, sizeof(nextGanzhi));
-        int cindex = dataFindHanIndex(pGlobalSixtyJiaZi, startJieName);
+        // int cindex = dataFindHanIndex(pGlobalSixtyJiaZi, startJieName);
         strcpy(nextGanzhi, &pGlobalSixtyJiaZi->pHan->szData[STRINDEX(aindex % 60)]);
         if (nCircle == 15)
         {

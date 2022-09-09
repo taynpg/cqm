@@ -25,18 +25,12 @@ int GetLunarYearDays(int nYear);                                                
 int GetLunarLeapDays(int nYear);                                                   // 返回农历 year 年闰月的天数
 int GetLunarLeapMonth(int nYear);                                                  // 返回农历 year 年润哪一个月
 int GetLunarMonthDays(int nYear, int nMonth);                                      // 返回农历 year 年 month 月的总天
-void GetPreDayFromDate(const calSolar* pSolar, calSolar* pResult);                 // 返回一个公历日期的前一天的日期
-void GetAfterDayFromDate(const calSolar* pSolar, calSolar* pResult);               // 返回一个公历日期的后一天的日期
 int GetDayDiffFromBase(const calSolar* pSolar);                                    // 返回距离 1900.1.1 的天数
-int GetDayDiffTwo(const calSolar* pSolarOne, const calSolar* pSolarTwo);           // 返回两个日期之间的天数差
 void AllocResult();                                                                // 为计算结果分配内存并初始化
 void FreeResult( calResult* pResult);                                              // 释放为计算结果分配的内存
 int GetLunarSTerm(int year, int n,  calSolar* pSolar);                             // 某年的第 n 个节气为几日 (从 0 小寒起算)
 void GetYearMonGanZhi(const calSolar* pSolar);                                     // 计算农历的年干支，月干支(以立春为新年)
 int GetSecondDiviZero(const calSolar* pSolar);                                     // 返回一个时间到 00:00:00 的秒数
-int GetRemainder(int nNum, int nBasic);                                            // 对数进行取余数(支持负数)
-void GetHourGanZhi();                                                              // 计算时辰干支(该函数要在计算完年月干支后进行)
-void GetHourGanZhi(const calSolar* pSolar);                                        // 计算时辰干支(该函数要在计算完年月干支后进行)
 /*
 void GetNowTime(calSolar* pSolar);                                                 // 获取系统时间
 */
@@ -45,7 +39,6 @@ void GetNextYearMonthGanZhi(const char* pYearGanzhi, char* pNextYearGanZhi, char
 void GetPreMonthGZ(int nYear, int nMon, const char* pYearGanZhi, const char* pMonGanZhi, char* pPreYearGZ, char* pPreMonGZ, int bIsLiChun);
 void GetNextJieQiInfo(int* year, int* month, char* pJieQi, char* monzhu, char* yearzhu);
 int GetSecondDiviTwoTime(const calSolar* pSolarOne, const calSolar* pSolarTwo);
-INT64 GetSecondDiviTwoDate(const calSolar* pSolarOne, const calSolar* pSolarTwo);
 
 // ===  基础数据区
 dataIndex* pGlobalWuHu = NULL;
@@ -61,7 +54,7 @@ dataHans* pGlobalSixtyJiaZi = NULL;
 calResult* pGlobalResult = NULL;
 
 // 拿到计算结果
-void calendarGetResult(calResult** pResult)
+void calendarGetResult(calResult** pResult)    /* NOLINT */
 {
     *pResult = pGlobalResult;
 }
@@ -1147,7 +1140,3 @@ int IsSolarAreaLegal(const calSolar* pSolar)
     else
         return 0;
 }                                            
-
-
-
-

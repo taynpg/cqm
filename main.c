@@ -3,10 +3,11 @@
 #include <qimenzpzr.h>
 #include <comline.h>
 #include <qimenyp.h>
+#include <qimenZg.h>
 /*
 *   奇门遁甲排盘
 *   CQM (cqm)       纯C语言(C99标准)实现。 
-*                   version:     1.0.1
+*                   version:     1.2.7
 *                   designed by: TAYNPG
 *
 *          https://gitee.com/taynpg/cqm  
@@ -23,25 +24,24 @@ int main(int argc, char** argv)
     if (re != 0)
         return -1;
     
+    int qimenRet = -1;
     switch (nStyle)
     {
     case 0:
-    {
-        int qimenRet = qimenZpZrRun(&solar, bIsAutoTime, nJushu);
-        if (qimenRet == 0)
-            PrintResult();
+        qimenRet = qimenZpZrRun(&solar, bIsAutoTime, nJushu);
         break;
-    }
     case 1:
-    {
-        int qimenRet = qimenYpRun(&solar, bIsAutoTime, nJushu);
-        if (qimenRet == 0)
-            PrintResult();
+        qimenRet = qimenYpRun(&solar, bIsAutoTime, nJushu);
         break;
-    }
+    case 2:
+        qimenRet = qimenZgRun(&solar, bIsAutoTime, nJushu);
+        break;
     default:
         break;
     }
+
+    if (qimenRet == 0)
+        PrintResult();
 
     // 释放命令行解析、奇门内存、日历内存。
     comlineFree();

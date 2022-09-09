@@ -3,28 +3,43 @@
 #include <string.h>
 #include <stdio.h>
 
-// 为中文数组分配内存
-void AllocHans(int nSize, dataHans** pData)
-{
-    if (nSize < 1)
-        return;
-    (*pData) = (dataHans *)malloc(sizeof(dataHans));
-    (*pData)->nLen = nSize;
-    (*pData)->pHan = (dataHan *)malloc(sizeof (dataHan) * (*pData)->nLen);
-    for (int i = 0; i < (*pData)->nLen; ++i)
-        memset((*pData)->pHan[i].szData, 0x0, sizeof ((*pData)->pHan[i].szData));
-}
 // 为对应表分配内存
-void AllocIndex(int nSize, dataIndex** pData)
+void AllocIndex(int nSize, dataIndex** pData)   /* NOLINT  */
 {
     if (nSize < 1)
         return;
     (*pData) = (dataIndex *)malloc(sizeof(dataIndex));
+
+    if (!(*pData))
+        return;
+
     (*pData)->nLen = nSize;
     (*pData)->pIndex = (int *)malloc(sizeof (int) * (*pData)->nLen);
-    for (int i = 0; i < (*pData)->nLen; ++i)
-        (*pData)->pIndex[i] = -1;
+    for (int i = 0; i < (*pData)->nLen; ++i) {
+        if ((*pData)->pIndex)
+            (*pData)->pIndex[i] = -1;
+    }
 }
+
+// 为中文数组分配内存
+void AllocHans(int nSize, dataHans** pData)     /* NOLINT  */
+{
+    if (nSize < 1)
+        return;
+    (*pData) = (dataHans *)malloc(sizeof(dataHans));
+
+    if (!(*pData))
+        return;
+
+    (*pData)->nLen = nSize;
+    (*pData)->pHan = (dataHan *)malloc(sizeof (dataHan) * (*pData)->nLen);
+    for (int i = 0; i < (*pData)->nLen; ++i)
+    {
+        if ((*pData)->pHan)
+            memset((*pData)->pHan[i].szData, 0x0, sizeof((*pData)->pHan[i].szData));
+    }     
+}
+
 // 初始化农历表
 void dataAllocLunarTable(dataIndex** pData)
 {
@@ -77,11 +92,6 @@ void dataAllocLunarTable(dataIndex** pData)
 void LineLn()
 {
     printf("===========================================\n");
-}
-
-void Line()
-{
-    printf("===========================================");
 }
 
 // 初始化节气信息
@@ -459,6 +469,16 @@ int STRINDEX(int nIndex)
 {
     return (nIndex * STR_LEN_08);
 }
+// 查询一个定长数组的指定值的下标
+int GetIndexFromArray(const int nArray[], int nLen, int nValue)
+{
+    for (int i = 0; i < nLen; ++i)
+    {
+        if (nArray[i] == nValue)
+            return i;
+    }
+    return -1;
+}
 // 初始化 九星
 void dataAllocJiuxing(dataHans** pData)
 {
@@ -635,5 +655,18 @@ void dataAllocDizhiGong(dataIndex** pIndex)
     d[8] = 1; d[9] = 6; d[10] = 5; d[11] = 5;
 }
 
+// 初始化三合局
+void dataAllocSanHeJu(dataIndex** pIndex)
+{
+    AllocIndex(12, pIndex);
+    int* d = (*pIndex)->pIndex;
 
+    // 寅午戌 火 2,7
+    // 亥卯未 木 3,8
+    // 巳酉丑 金 4,9
+    // 申子辰 水 1,6
+    d[0] = 16; d[1] = 49; d[2] = 27; d[3] = 38;
+    d[4] = 16; d[5] = 49; d[6] = 27; d[7] = 38;
+    d[8] = 16; d[9] = 49; d[10] = 27; d[11] = 38;
+}
 

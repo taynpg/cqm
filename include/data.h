@@ -1,21 +1,21 @@
-#ifndef CQM_DATA_H_
-#define CQM_DATA_H_
+#ifndef _CQM_DATA_H_
+#define _CQM_DATA_H_
 
 #include <define.h>
 
 // 保存两个或两个字以内的汉字
-typedef struct _dataHan
+typedef struct dataHan
 {
     char szData[STR_LEN_08];
 }dataHan;
 // 汉字数组
-typedef struct _dataHans
+typedef struct dataHans
 {
     dataHan* pHan;
     int nLen;
 }dataHans;
 // 索引对应表
-typedef struct _dataIndex
+typedef struct dataIndex
 {
     int nLen;
     int* pIndex;
@@ -61,10 +61,12 @@ void dataAllocDizhiSanhe(dataIndex** pIndex);
 void dataAllocDizhiChong(dataIndex** pIndex);
 // 初始化地支所在的宫位
 void dataAllocDizhiGong(dataIndex** pIndex);
-// 
+// 初始化节气时间
 void dataAllocJieQiTime(dataIndex** pData);
+// 初始化农历日期对照表
 void dataAllocLunarTable(dataIndex** pData);
-
+// 初始化三合局
+void dataAllocSanHeJu(dataIndex** pIndex);
 
 // ***********************************************************************************************
 // ******************                                                *****************************
@@ -82,9 +84,10 @@ void dataFreeIndexCounter(dataIndex* pIndex);
 void dataGetSubStr(const char* pSource, char* pDestination, int nIndex, int nNum);
 // 将下标转换成 Hans 下标用于取 Hans 中的数据
 int STRINDEX(int nIndex);
-
+// 查询一个定长数组的指定值的下标
+int GetIndexFromArray(const int nArray[], int nLen, int nValue);
+// 打印分隔符
 void LineLn();
-void Line();
 
 #endif
 

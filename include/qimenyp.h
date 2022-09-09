@@ -1,3 +1,6 @@
+#ifndef _QIMEN_YP_H_
+#define _QIMEN_YP_H_
+
 #include <stdio.h>
 #include <calendar.h>
 #include <data.h>
@@ -18,4 +21,10 @@
                         -3: 日期不在有效范围内
 */
 int qimenYpRun(calSolar* pSolar, int bIsAutoTime, int qimenJuShu);
-void qimenYpZrFree();
+
+
+// *************************** 对外接口  ********************************
+// 计算局数
+void generateJushuYp(const calSolar* pSolar);
+
+#endif

@@ -44,50 +44,26 @@ extern char         szGlobalCurJieqi[STR_LEN_08];       // 传入日期当天的
 extern char         szGlobalCurGanzi[STR_LEN_08];       // 传入日期当天的日干支
 extern int          nOneCircle[8];                      // 九宫的顺时针旋转下标顺序(从坤2宫开始)
 
-// 计算局数
-void getJushu(const calSolar* pSolar);
-void generateDipan();
-
 int qimenYpRun(calSolar* pSolar, int bIsAutoTime, int qimenJuShu)
 {
     qimenInit();
 
-    // 处理日期相关
-    if (bIsAutoTime == 1)
-        GetNowTime(pSolar);
-
-    if (bIsAutoTime == 2)
-    {
-        GetNowTime(pSolar);
-        calSolar sTem;
-        DupSolar(pSolar, &sTem);
-        GetDateByDiffSecond(&sTem, pSolar, 8*60*60);
-    }
-
-    if (qimenJuShu < -9 || qimenJuShu > 9)
-        return -1;
-
-    // 检查日期是否合法
-    if (IsSolarLegal(pSolar) != 0)
-    {
-        InlegalTime();
-        return -2;
-    }
-
-    // 检查日期是否在范围内
-    if (IsSolarAreaLegal(pSolar) != 0)
-        return -3;
+    int nRet = qimenParmCheck(pSolar, bIsAutoTime, qimenJuShu);
+    if (nRet != 0)
+        return nRet;
 
     // 定局数
-    getJushu(pSolar);
+    generateJushuYp(pSolar);
     // 地盘排布
     GenerateZpZrDiPan();
     // 算当日日期
     calendarRun(pSolar);
     // 查找值符值使
     FindZhiShiFuZpZr();
-    // 转动九星八门
-    GenerateXingMenZpZr();
+    // 九星
+    GenerateXingZpZr();
+    // 八门
+    GenerateMenZpZr();
     // 计算八神
     GenerateBaShenZpZr();
     // 计算天盘
@@ -99,7 +75,7 @@ int qimenYpRun(calSolar* pSolar, int bIsAutoTime, int qimenJuShu)
 }
 
 // 计算局数
-void getJushu(const calSolar* pSolar)
+void generateJushuYp(const calSolar* pSolar)
 {
     int nJu = 0;
     // 计算当日日历
@@ -155,7 +131,8 @@ void getJushu(const calSolar* pSolar)
 
     // ------- 阳遁 ----- 夏至 ---- 阴遁 -------- 冬至 ----- 阳遁
     // 根据当日日期和夏至冬至日期判断阴阳遁
-    if (GetSecondDiviTwoDate(pSolar, &xiazhiTime) > 0 && GetSecondDiviTwoDate(pSolar, &dongzhiTime) <= 0)
+    if (GetSecondDiviTwoDate(pSolar, &xiazhiTime) > 0 &&
+    GetSecondDiviTwoDate(pSolar, &dongzhiTime) <= 0)
     {
         // 当日日期在夏至之后冬至之前则为阴遁
         nGlobalJushu = -nGlobalJushu;

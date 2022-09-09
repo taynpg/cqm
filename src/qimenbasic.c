@@ -11,14 +11,16 @@ dataIndex*          pGlobalLiuJia = NULL;
 dataIndex*          pGlobalDiZhiGong = NULL;
 dataIndex*          pGlobalDiZhiChong = NULL;
 dataIndex*          pGlobalDiZhiSanhe = NULL;
+dataIndex*          pGlobalSanheJu = NULL;
 
 int                 bGlobalZhirun = 0;                  // 0 不置润，其他置润
-int                 bGlobalAutoTime = 1;                // 0 手动输入时间，其他自动获取时间
+// int                 bGlobalAutoTime = 1;                // 0 手动输入时间，其他自动获取时间
 int                 nGlobalJushu = 0;                   // 0 自动计算, 其他是几局就是几局
 char                szGlobalYuan[STR_LEN_08];           // 上中下三元
 char                szGlobalCurJieqi[STR_LEN_08];       // 传入日期当天的节气
 char                szGlobalCurGanzi[STR_LEN_08];       // 传入日期当天的日干支
 int                 nOneCircle[8];                      // 九宫的顺时针旋转下标顺序(从坤2宫开始)
+int                 nGongNum[9];                        // 九宫各宫位代表的数字
 
 char                szReNullOne[STR_LEN_08];            // 空亡一
 char                szReNullTwo[STR_LEN_08];            // 空亡二
@@ -39,7 +41,7 @@ void qimenInit()
     nReZhishi = -1;
 
     bGlobalZhirun = 0;
-    bGlobalAutoTime = 1;
+    // bGlobalAutoTime = 1;
     nGlobalJushu = 0;
 
     nOneCircle[0] = 1; nOneCircle[1] = 6; nOneCircle[2] = 5;
@@ -51,6 +53,9 @@ void qimenInit()
         nReJiuXing[i] = -1;
         nReBamen[i] = -1;
         nReBashen[i] = -1;
+
+        // 九宫各宫位代表的数字的默认值
+        nGongNum[i] = i;
     }
     // 置三元为空
     memset(szGlobalYuan, 0x0, sizeof(szGlobalYuan));
@@ -86,6 +91,9 @@ void qimenInit()
     //10. 初始化地支三和
     if (pGlobalDiZhiSanhe == NULL)
         dataAllocDizhiSanhe(&pGlobalDiZhiSanhe);
+    //11。 初始化三合局
+    if (pGlobalSanheJu == NULL)
+        dataAllocSanHeJu(&pGlobalSanheJu);
 }
 
 void qimenFree()
@@ -138,16 +146,75 @@ void qimenFree()
         dataFreeIndexCounter(pGlobalDiZhiGong);
         pGlobalDiZhiGong = NULL;
     }
-    // 8. 去初始化地支相冲
+    // 9. 去初始化地支相冲
     if (pGlobalDiZhiChong)
     {
         dataFreeIndexCounter(pGlobalDiZhiChong);
         pGlobalDiZhiChong = NULL;
     }
-    // 9. 去初始化地支三和
+    // 10. 去初始化地支三和
     if (pGlobalDiZhiSanhe)
     {
         dataFreeIndexCounter(pGlobalDiZhiSanhe);
         pGlobalDiZhiSanhe = NULL;
+    }
+    // 11. 去初始化三合局
+    if (pGlobalSanheJu)
+    {
+        dataFreeIndexCounter(pGlobalSanheJu);
+        pGlobalSanheJu = NULL;
+    }
+}
+
+// 奇门输入是否正确
+int qimenParmCheck(calSolar* pSolar, int bIsAutoTime, int qimenJuShu)
+{
+        // 处理日期相关
+    if (bIsAutoTime == 1)
+        GetNowTime(pSolar);
+
+    if (bIsAutoTime == 2)
+    {
+        GetNowTime(pSolar);
+        calSolar sTem;
+        DupSolar(pSolar, &sTem);
+        GetDateByDiffSecond(&sTem, pSolar, 8*60*60);
+    }
+
+    if (qimenJuShu < -9 || qimenJuShu > 9)
+        return -1;
+
+    // 检查日期是否合法
+    if (IsSolarLegal(pSolar) != 0)
+    {
+        InlegalTime();
+        return -2;
+    }
+
+    // 检查日期是否在范围内
+    if (IsSolarAreaLegal(pSolar) != 0)
+        return -3;
+
+    return 0;
+}
+
+// 旋转基础定义 (用于旋转宫的数字定义正顺时针旋转，负值逆时针旋转，0不旋转)
+void basicNumberTurned(int nTurnedNum)
+{
+    if (nTurnedNum == 0)
+        return;
+    
+    for (int i = 0; i < 9; ++i)
+    {
+        if (i == 4)
+        {
+            nGongNum[4] = 4;
+            continue;
+        }
+        // 找到当前数字的位置下标
+        int currentIndex = GetIndexFromArray(nOneCircle, 9, i);
+        int newIndex = GetRemainder((currentIndex + nTurnedNum), 8);
+        int newPosition = nOneCircle[newIndex];
+        nGongNum[newPosition] = i;
     }
 }

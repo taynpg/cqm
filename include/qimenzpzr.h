@@ -1,3 +1,6 @@
+#ifndef _QIMEN_ZPZR_H_
+#define _QIMEN_ZPZR_H_
+
 #include <stdio.h>
 #include <calendar.h>
 #include <data.h>
@@ -17,16 +20,17 @@
                         -3: 日期不在有效范围内
 */
 int qimenZpZrRun(calSolar* pSolar, int bIsAutoTime, int qimenJuShu);
-void qimenZpZrFree();
-
 
 // 如下部分是给有相同计算逻辑的的其他排盘方式使用
+
 // 计算地盘
 void GenerateZpZrDiPan();
 // 找值符、直使
 void FindZhiShiFuZpZr();
-// 转动九星八门
-void GenerateXingMenZpZr();
+// 转动九星
+void GenerateXingZpZr();
+// 转动八门
+void GenerateMenZpZr();
 // 计算八神
 void GenerateBaShenZpZr();
 // 计算天盘
@@ -34,3 +38,4 @@ void GenerateTianPanZpZr();
 // 计算旬空、马星
 void GenerateOtherZpZr();
 
+#endif

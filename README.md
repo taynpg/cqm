@@ -15,18 +15,22 @@
 
 # 安装
 
-安装有三种方法：
+安装示例如下：
 
-1. 如果是`Linux`或者`Mac`，直接使用`make`命令即可。
-
-2. 如果是`Windows`，分为两种情况。
-
-   (1) 如果使用的是`Mingw64`，那么执行`mingw-build.bat`即可。
-
-   (2) 如果使用的是`MSVC`编译器，那么需要打开本地的名为：`Developer Command Prompt for VS 2022`的终端（或其他版本、或类似的名为`VS2015 x64/86 本机命令提示符`、或类似名为`VS开发人员命令提示符`的终端），此终端默认配置了编译器需要的环境，在此命令行中执行`msvc-build.bat`即可。
+```python
+# 进入源码
+cd cqm
+# 创建一个build文件夹
+mkdir build
+# 进入
+cd build
+# cmake 生成工程文件(自己可以指定参数)
+cmake ../
+# 编译 
+make (gcc, mingw64, clang等编译器)
+打开sln工程编译(MSVC编译器)
+```
 
 # 最后
 
 如果你有好的建议或者发现了`BUG`，可以联系我：taynpg@163.com。
-
-因github网络原因，主要更新地址在同名Gitee上：https://gitee.com/taynpg/cqm

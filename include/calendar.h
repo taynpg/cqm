@@ -5,7 +5,7 @@
 
 typedef long long int INT64;
 // 字典结构体
-typedef struct _calSolar
+typedef struct calSolar
 {
     int nSolarYear;       // 公历年
     int nSolarMonth;      // 公历月
@@ -15,7 +15,7 @@ typedef struct _calSolar
     int nSolarSecond;     // 公历秒钟
 }calSolar;
 // 农历
-typedef struct _calLunar
+typedef struct calLunar
 {
     int nLunarYear;       // 农历年
     int nLunarMonth;      // 农历月
@@ -24,7 +24,7 @@ typedef struct _calLunar
     int bLeapMonth;       // 是不是闰月
 }calLunar;
 // 农历四干支
-typedef struct _calGanZhi
+typedef struct calGanZhi
 {
     char szLunarYearGZ[STR_LEN_08];    // 年干支(两个字)
     char szLunarMonthGZ[STR_LEN_08];   // 月干支(两个字)
@@ -32,7 +32,7 @@ typedef struct _calGanZhi
     char szLunarHourGZ[STR_LEN_08];    // 时干支(两个字)
 }calGanZhi;
 // 当月节气
-typedef struct _calMonthJieQi
+typedef struct calMonthJieQi
 {
     int nYear;
     int nMonth;
@@ -48,15 +48,13 @@ typedef struct _calMonthJieQi
     char szSecondJieQi[STR_LEN_08];
 }calMonthJieQi;
 // 计算结果结构
-typedef struct _calResult
+typedef struct calResult
 {
     calSolar*       pSolar;
     calLunar*       pLunar;
     calGanZhi*      pGanzi;
     calMonthJieQi*  pMonJieQi;
 }calResult;
-
-
 
 int calendarRun(const calSolar* pSolar);                                                    // 传入公历进行结算
 void calendarGetResult(calResult** pResult);                                                // 拿到计算结果
