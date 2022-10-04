@@ -9,7 +9,7 @@ MESSAGE(STATUS "compiler id: ${CMAKE_C_COMPILER_ID}")
 
 if ("${CMAKE_C_COMPILER_ID}" STREQUAL "MSVC")
     MESSAGE(STATUS "add windows compiler flag")
-    set(CMAKE_C_FLAGS "${CMAKE_CXX_FLAGS} /source-charset:utf-8 /EHsc")
+    set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} /source-charset:utf-8 /EHsc")
     # set_target_properties(${PROJECT_NAME} PROPERTIES COMPILE_FLAGS "/source-charset:utf-8")
     add_definitions(-D_CRT_SECURE_NO_WARNINGS)
     MESSAGE(STATUS "Compiler C_FLAGS:${CMAKE_C_FLAGS}")
