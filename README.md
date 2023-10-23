@@ -34,3 +34,5 @@ make (gcc, mingw64, clang等编译器)
 # 最后
 
 如果你有好的建议或者发现了`BUG`，可以联系我：taynpg@163.com。
+
+最新的更新移至：[csp-(cpp shi pan，C++式盘)](https://github.com/taynpg/csp)
