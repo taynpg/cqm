@@ -7,11 +7,11 @@
 
 ## 1.直接执行显示说明
 
-![image](https://gitee.com/taynpg/cqm/raw/master/images/startA.png)
+![image](https://gitee.com/sinxmiao/cqm/raw/main/images/startA.png)
 
 ## 2.按照说明跑一个例子
 
-![image](https://gitee.com/taynpg/cqm/raw/master/images/startB.png)
+![image](https://gitee.com/sinxmiao/cqm/raw/main/images/startB.png)
 
 # 安装
 
@@ -27,8 +27,7 @@ cd build
 # cmake 生成工程文件(自己可以指定参数)
 cmake ../
 # 编译 
-make (gcc, mingw64, clang等编译器)
-打开sln工程编译(MSVC编译器)
+cmake --build . --config release
 ```
 
 # 最后
